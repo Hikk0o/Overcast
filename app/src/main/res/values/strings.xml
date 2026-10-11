@@ -43,6 +43,14 @@
     <string name="weather_search_city">Search for a city</string>
     <string name="weather_search_no_results">No cities found</string>
     <string name="weather_section_display">Display</string>
+    <string name="weather_section_island">Dynamic island</string>
+    <string name="island_mode_title">Show on island</string>
+    <string name="island_mode_brief">Brief only</string>
+    <string name="island_mode_compact">Always</string>
+    <string name="island_mode_alerts">Alerts only</string>
+    <string name="island_peek_alerts_title">Peek for alerts</string>
+    <string name="island_provider_label">Weather</string>
+    <string name="island_provider_description">Overcast wants to show live weather, alerts and forecasts on your island.</string>
     <string name="weather_section_screensaver">Screensaver</string>
     <string name="screensaver_description">Visualize current weather</string>
     <string name="screensaver_show_forecast">Show forecast</string>
@@ -126,10 +134,6 @@
     <string name="weather_place_remove_saved">Remove from saved</string>
     <string name="weather_place_remove_recent">Remove</string>
     <string name="weather_choose_location">Choose a location</string>
-    <string name="permlab_read_weather">Read weather data</string>
-    <string name="permdesc_read_weather">Lets the app read the latest weather for your current or saved location from Overcast.</string>
-    <string name="permgrouplab_weather">Weather</string>
-    <string name="permgroupdesc_weather">access weather data from Overcast</string>
     <string name="support_banner_title">Support Overcast</string>
     <string name="support_banner_text">Get the app from Google Play to support its development</string>
     <string name="onboarding_thanks">Thank you for the support &lt;3</string>

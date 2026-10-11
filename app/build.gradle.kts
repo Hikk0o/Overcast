@@ -103,6 +103,7 @@ dependencies {
     implementation(libs.play.services.location)
     "playImplementation"(libs.play.billing.ktx)
     implementation(libs.gson)
+    implementation(project(":island-sdk-compose"))
     implementation(libs.coil.compose)
     implementation(libs.aboutlibraries.core)
     implementation(libs.aboutlibraries.compose.m3)

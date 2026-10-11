@@ -48,10 +48,11 @@ Alert coverage depends on the source. Not every provider returns alerts for ever
 
 ## Essentials integration
 
-Overcast can share its latest forecast with [Essentials](https://github.com/sameerasw/essentials) for the Dynamic Island and the Brief card.
+Overcast is a Dynamic Island provider for [Essentials](https://github.com/sameerasw/essentials). Essentials binds to Overcast's island service once the user enables it there, and Overcast pushes its own icons, text and the expanded view.
 
-- Overcast declares a `READ_WEATHER` permission. Essentials has to be granted it before any data is shared.
-- Essentials is notified when Overcast stores a new forecast, so the two stay in sync without polling.
+- The service is declared with the `com.sameerasw.island.PROVIDER` action and only accepts the Essentials package.
+- The compact pill and line are sent as data; the expanded view is rendered by Overcast and embedded by Essentials.
+- Island options (when to show, alert peeks, effects) live in Overcast's settings.
 
 ## Installation
 
