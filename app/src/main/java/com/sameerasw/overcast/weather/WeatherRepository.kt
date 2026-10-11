@@ -12,7 +12,6 @@ import com.sameerasw.overcast.weather.model.WeatherLocation
 import com.sameerasw.overcast.weather.model.WeatherSnapshot
 import com.sameerasw.overcast.weather.model.WeatherState
 import com.sameerasw.overcast.weather.provider.WeatherProviderException
-import com.sameerasw.overcast.weather.share.WeatherContentProvider
 import com.sameerasw.overcast.weather.widget.WeatherWidgetUpdater
 import com.sameerasw.overcast.weather.provider.WeatherProviders
 import kotlinx.coroutines.Dispatchers
@@ -105,7 +104,6 @@ object WeatherRepository {
                 cache = cache.copy(snapshot = snapshot)
                 persist(app)
                 _state.value = WeatherState(snapshot = snapshot)
-                WeatherContentProvider.notifyChanged(app)
                 WeatherWidgetUpdater.updateAll(app)
                 true
             } catch (e: WeatherProviderException) {

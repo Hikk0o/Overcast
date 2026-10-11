@@ -24,4 +24,8 @@ dependencyResolutionManagement {
 
 rootProject.name = "Overcast"
 include(":app")
+include(":island-sdk")
+project(":island-sdk").projectDir = file("../essentials/island-sdk")
+include(":island-sdk-compose")
+project(":island-sdk-compose").projectDir = file("../essentials/island-sdk-compose")
  
