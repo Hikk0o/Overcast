@@ -86,7 +86,7 @@ class SettingsRepository(
     fun isDeveloperModeEnabled(): Boolean = getBoolean(KEY_DEVELOPER_MODE_ENABLED, false)
     fun setDeveloperModeEnabled(enabled: Boolean) = putBoolean(KEY_DEVELOPER_MODE_ENABLED, enabled)
 
-    fun getIslandMode(): String = getString(KEY_ISLAND_MODE, ISLAND_MODE_BRIEF) ?: ISLAND_MODE_BRIEF
+    fun getIslandMode(): String = getString(KEY_ISLAND_MODE, ISLAND_MODE_COMPACT) ?: ISLAND_MODE_COMPACT
     fun setIslandMode(mode: String) = putString(KEY_ISLAND_MODE, mode)
 
     fun isIslandPeekAlertsEnabled(): Boolean = getBoolean(KEY_ISLAND_PEEK_ALERTS, true)
