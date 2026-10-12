@@ -1024,7 +1024,7 @@ private class Detail(val slot: WeatherDetailSlot, val label: Int, val value: Str
 private fun DetailsSection(snapshot: WeatherSnapshot, units: WeatherUnits, palette: WeatherPalette, modifier: Modifier) {
     val extras = snapshot.extras
     val details = buildList {
-        add(Detail(WeatherDetailSlot.HUMIDITY, R.string.weather_detail_humidity, "${snapshot.humidity}%"))
+        snapshot.humidity?.let { add(Detail(WeatherDetailSlot.HUMIDITY, R.string.weather_detail_humidity, "$it%")) }
         add(
             Detail(
                 WeatherDetailSlot.WIND,
@@ -1033,7 +1033,7 @@ private fun DetailsSection(snapshot: WeatherSnapshot, units: WeatherUnits, palet
             ),
         )
         extras?.windGustKph?.let { add(Detail(WeatherDetailSlot.GUSTS, R.string.weather_detail_gusts, WeatherFormat.wind(it, units.wind))) }
-        add(Detail(WeatherDetailSlot.RAIN_CHANCE, R.string.weather_detail_rain_chance, "${snapshot.chanceOfRain}%"))
+        snapshot.chanceOfRain?.let { add(Detail(WeatherDetailSlot.RAIN_CHANCE, R.string.weather_detail_rain_chance, "$it%")) }
         extras?.precipitationMm?.let {
             add(Detail(WeatherDetailSlot.PRECIPITATION, R.string.weather_detail_precipitation, WeatherFormat.precipitation(it, units.precipitation)))
         }
@@ -1147,7 +1147,7 @@ private fun Footer(
                         verticalArrangement = Arrangement.Center,
                     ) {
                         Text(
-                            text = error?.let { errorLabel(context, it) } ?: WeatherProviders.byId(snapshot.providerId).displayName,
+                            text = error?.let { errorLabel(context, it) } ?: if (snapshot.providerId == "yandex") stringResource(R.string.weather_attribution_yandex) else WeatherProviders.byId(snapshot.providerId).displayName,
                             color = palette.accent,
                             style = MaterialTheme.typography.titleSmall,
                             maxLines = 1,

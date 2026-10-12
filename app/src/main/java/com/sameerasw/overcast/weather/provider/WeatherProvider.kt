@@ -9,6 +9,7 @@ interface WeatherProvider {
     val displayName: String
     val requiresApiKey: Boolean
     val signupUrl: String?
+    val minRefreshMinutes: Int get() = 15
 
     suspend fun fetch(location: WeatherLocation, apiKey: String?): WeatherSnapshot
 
@@ -30,6 +31,7 @@ object WeatherProviders {
         OpenWeatherMapProvider(),
         WeatherApiProvider(),
         AccuWeatherProvider(),
+        YandexWeatherProvider(),
     )
 
     val default: WeatherProvider get() = all.first()
