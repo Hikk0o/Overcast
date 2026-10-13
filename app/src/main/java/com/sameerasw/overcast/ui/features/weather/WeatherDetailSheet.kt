@@ -1147,7 +1147,7 @@ private fun Footer(
                         verticalArrangement = Arrangement.Center,
                     ) {
                         Text(
-                            text = error?.let { errorLabel(context, it) } ?: if (snapshot.providerId == "yandex") stringResource(R.string.weather_attribution_yandex) else WeatherProviders.byId(snapshot.providerId).displayName,
+                            text = error?.let { errorLabel(context, it) } ?: providerLabel(snapshot.providerId),
                             color = palette.accent,
                             style = MaterialTheme.typography.titleSmall,
                             maxLines = 1,
@@ -1305,4 +1305,10 @@ internal fun AmbientClock(ambient: () -> Float, palette: WeatherPalette, modifie
                 translationY = (1f - reveal) * 16.dp.toPx()
             },
     )
+}
+
+@Composable
+internal fun providerLabel(providerId: String): String {
+    val provider = WeatherProviders.byId(providerId)
+    return provider.attributionRes?.let { stringResource(it) } ?: provider.displayName
 }

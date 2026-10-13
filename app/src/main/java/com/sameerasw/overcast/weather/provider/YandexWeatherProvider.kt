@@ -1,5 +1,6 @@
 package com.sameerasw.overcast.weather.provider
 
+import com.sameerasw.overcast.R
 import com.sameerasw.overcast.weather.model.CityResult
 import com.sameerasw.overcast.weather.model.DailyForecast
 import com.sameerasw.overcast.weather.model.HourlyForecast
@@ -20,23 +21,20 @@ class YandexWeatherProvider : WeatherProvider {
     override val displayName = "Yandex Weather"
     override val requiresApiKey = true
     override val signupUrl = "https://yandex.ru/pogoda/b2b/console/smarthome"
-    override val minRefreshMinutes = 60
-
-    // The tariff allows 30 requests a day. A 50-minute gap keeps any rolling day under that.
-    // ponytail: the guard is in memory and resets when the process restarts; store the timestamp if the cap must hold across restarts.
-    private val lock = Any()
-    private var lastRequestMs = 0L
+    // The tariff allows 30 requests a day. A 50-minute gap keeps any rolling day under that; the repository enforces it.
+    override val minRefreshMinutes = 50
+    override val attributionRes = R.string.weather_attribution_yandex
 
     override suspend fun fetch(location: WeatherLocation, apiKey: String?): WeatherSnapshot {
         val key = apiKey?.trim().orEmpty()
         if (key.isEmpty()) throw WeatherProviderException(WeatherProviderException.Reason.INVALID_KEY)
-        if (!reserveRequest()) throw WeatherProviderException(WeatherProviderException.Reason.RATE_LIMITED)
         val body = JSONObject().put("query", graphQuery(location)).toString()
         val json = try {
             JSONObject(ProviderHttp.post(BASE_URL, body, mapOf(KEY_HEADER to key)))
         } catch (e: JSONException) {
             throw WeatherProviderException(WeatherProviderException.Reason.BAD_RESPONSE, e.message)
         }
+        throwOnApiErrors(json)
         val place = location.name?.let { it to "" } ?: ProviderHttp.reverseGeocode(location.latitude, location.longitude)
         return try {
             parseForecast(json.getJSONObject("data").getJSONObject("weatherByPoint"), place)
@@ -47,13 +45,16 @@ class YandexWeatherProvider : WeatherProvider {
 
     override suspend fun searchCities(query: String, apiKey: String?): List<CityResult> = ProviderHttp.searchCities(query)
 
-    private fun reserveRequest(): Boolean {
-        synchronized(lock) {
-            val now = System.currentTimeMillis()
-            if (now - lastRequestMs < MIN_REQUEST_GAP_MS) return false
-            lastRequestMs = now
-            return true
+    // GraphQL reports failures with HTTP 200 and an errors array instead of data.
+    private fun throwOnApiErrors(json: JSONObject) {
+        if (!json.isNull("data")) return
+        val message = json.optJSONArray("errors")?.optJSONObject(0)?.optString("message").orEmpty()
+        val reason = if (AUTH_ERROR.containsMatchIn(message)) {
+            WeatherProviderException.Reason.INVALID_KEY
+        } else {
+            WeatherProviderException.Reason.BAD_RESPONSE
         }
+        throw WeatherProviderException(reason, message.ifBlank { null })
     }
 
     // Point 2.7 parameters plus precProbability (see the header). The forecast covers today and tomorrow.
@@ -117,7 +118,7 @@ class YandexWeatherProvider : WeatherProvider {
                             timeMillis = timestamp * 1000L,
                             tempC = hour.getDouble("temperature"),
                             condition = conditionFor(hour.getString("condition")),
-                            isDay = !isNight(hour.optString("icon")),
+                            isDay = isDaytime(timestamp, days.getJSONObject(d), hour.optString("icon")),
                             chanceOfRain = percent(hour.optDouble("precProbability")),
                         ),
                     )
@@ -132,7 +133,7 @@ class YandexWeatherProvider : WeatherProvider {
             feelsLikeC = now.getDouble("feelsLike"),
             condition = conditionFor(now.getString("condition")),
             conditionText = now.getString("condition"),
-            isDay = !isNight(now.optString("icon")),
+            isDay = isDaytime(nowMillis / 1000L, days.getJSONObject(0), now.optString("icon")),
             humidity = null,
             windKph = now.getDouble("windSpeed"),
             chanceOfRain = today?.chanceOfRain,
@@ -162,8 +163,12 @@ class YandexWeatherProvider : WeatherProvider {
         )
     }
 
-    // The free tariff has no daytime field. Night icons end in "_n", for example "skc_n".
-    private fun isNight(icon: String): Boolean = icon.endsWith("_n")
+    // The free tariff has no daytime field, so the day's sunrise and sunset decide; night icons end in "_n", for example "skc_n", as a fallback.
+    private fun isDaytime(timestampS: Long, day: JSONObject, icon: String): Boolean {
+        val sunrise = day.optLong("sunriseTimestamp")
+        val sunset = day.optLong("sunsetTimestamp")
+        return if (sunrise > 0 && sunset > sunrise) timestampS in sunrise until sunset else !icon.endsWith("_n")
+    }
 
     // precProbability is a 0..1 chance; a missing field (NaN) counts as 0.
     private fun percent(probability: Double): Int = if (probability.isNaN()) 0 else (probability * 100).roundToInt()
@@ -201,6 +206,6 @@ class YandexWeatherProvider : WeatherProvider {
         const val KEY_HEADER = "X-Yandex-Weather-Key"
         const val HOUR_S = 60 * 60L
         const val HOURLY_COUNT = 24
-        const val MIN_REQUEST_GAP_MS = 50 * 60 * 1000L
+        val AUTH_ERROR = Regex("unauthori[sz]ed|forbidden|api key|invalid key|access denied", RegexOption.IGNORE_CASE)
     }
 }

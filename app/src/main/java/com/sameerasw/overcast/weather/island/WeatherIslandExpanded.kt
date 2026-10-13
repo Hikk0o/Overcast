@@ -60,7 +60,7 @@ import com.sameerasw.overcast.weather.effects.WeatherEffects
 import com.sameerasw.overcast.weather.model.WeatherAlert
 import com.sameerasw.overcast.weather.model.WeatherError
 import com.sameerasw.overcast.weather.model.WeatherSnapshot
-import com.sameerasw.overcast.weather.provider.WeatherProviders
+import com.sameerasw.overcast.ui.features.weather.providerLabel
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -280,7 +280,7 @@ private fun UpdatedRow(
     ).toString()
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Text(
-            text = if (error != null) errorText(error) else "${if (snapshot.providerId == "yandex") stringResource(R.string.weather_attribution_yandex) else WeatherProviders.byId(snapshot.providerId).displayName} - $age",
+            text = if (error != null) errorText(error) else "${providerLabel(snapshot.providerId)} - $age",
             style = body.copy(fontSize = 11.sp),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
